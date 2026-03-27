@@ -1,0 +1,15 @@
+{
+  "/_global-error/page": "/_global-error",
+  "/_not-found/page": "/_not-found",
+  "/api/cash-session/route": "/api/cash-session",
+  "/api/categories/route": "/api/categories",
+  "/api/inventory/route": "/api/inventory",
+  "/api/locations/route": "/api/locations",
+  "/api/products/[id]/route": "/api/products/[id]",
+  "/api/products/route": "/api/products",
+  "/api/reports/route": "/api/reports",
+  "/api/route": "/api",
+  "/api/sales/[id]/route": "/api/sales/[id]",
+  "/api/sales/route": "/api/sales",
+  "/page": "/"
+}
