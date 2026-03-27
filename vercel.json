@@ -1,6 +1,5 @@
 {
-  "buildCommand": "npm run build",
-  "outputDirectory": ".next",
-  "framework": "nextjs",
-  "regions": ["sfo1"]
+  "buildCommand": "prisma generate && prisma db push --accept-data-loss && next build",
+  "installCommand": "npm install",
+  "framework": "nextjs"
 }

@@ -6,8 +6,9 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_DATABASE_URL")
 }
 
 // ==================== USUARIOS Y CAJEROS ====================
@@ -22,8 +23,9 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   
-  sales     Sale[]
-  sessions  CashSession[]
+  sales        Sale[]
+  sessions     CashSession[]
+  movements    Movement[]
 }
 
 // ==================== UBICACIONES ====================
@@ -37,11 +39,11 @@ model Location {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   
-  inventory   Inventory[]
-  sales       Sale[]
-  movements   Movement[] @relation("MovementFrom")
-  movementsTo Movement[] @relation("MovementTo")
-  sessions    CashSession[]
+  inventory       Inventory[]
+  sales           Sale[]
+  sessions        CashSession[]
+  movementsFrom   Movement[]  @relation("MovementFrom")
+  movementsTo     Movement[]  @relation("MovementTo")
 }
 
 // ==================== PRODUCTOS ====================
@@ -83,30 +85,30 @@ model Product {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   
-  inventory   Inventory[]
-  saleItems   SaleItem[]
-  movements   MovementItem[]
+  inventory       Inventory[]
+  saleItems       SaleItem[]
+  movementItems   MovementItem[]
 }
 
 // ==================== INVENTARIO ====================
 
 model Inventory {
-  id           String   @id @default(cuid())
+  id           String    @id @default(cuid())
   productId    String
-  product      Product  @relation(fields: [productId], references: [id])
+  product      Product   @relation(fields: [productId], references: [id])
   locationId   String
-  location     Location @relation(fields: [locationId], references: [id])
+  location     Location  @relation(fields: [locationId], references: [id])
   
-  quantity     Int      @default(0)
-  minStock     Int      @default(5)    // Alerta de stock mínimo
-  maxStock     Int      @default(100)  // Stock máximo
+  quantity     Int       @default(0)
+  minStock     Int       @default(5)    // Alerta de stock mínimo
+  maxStock     Int       @default(100)  // Stock máximo
   
   // Fechas de caducidad (opcional)
   expiryDate   DateTime?
   batchNumber  String?
   
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
   
   @@unique([productId, locationId])
 }
@@ -215,6 +217,8 @@ model Movement {
   notes         String?
   
   userId        String   // Quién autoriza
+  user          User     @relation(fields: [userId], references: [id])
+  
   status        String   @default("completado") // pendiente, completado, cancelado
   
   createdAt     DateTime @default(now())
