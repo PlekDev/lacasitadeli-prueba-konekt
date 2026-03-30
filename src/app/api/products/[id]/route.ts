@@ -1,22 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 
-// GET - Obtener producto por ID
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await params
+    const { searchParams } = new URL(request.url)
+    const locationId = searchParams.get('locationId') || ''
+
     const product = await db.product.findUnique({
       where: { id },
       include: {
         category: true,
-        inventory: {
-          include: {
-            location: true,
-          },
-        },
+        inventory: locationId ? {
+          where: { locationId },
+        } : true,
       },
     })
 
@@ -26,59 +26,49 @@ export async function GET(
 
     return NextResponse.json({ success: true, data: product })
   } catch (error) {
-    console.error('Error fetching product:', error)
-    return NextResponse.json({ success: false, error: 'Error al obtener producto' }, { status: 500 })
+    console.error('Error fetching product detail:', error)
+    return NextResponse.json({ success: false, error: 'Error al obtener el producto' }, { status: 500 })
   }
 }
 
-// PUT - Actualizar producto
-export async function PUT(
+export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await params
     const body = await request.json()
-    const { name, barcode, sku, description, categoryId, costPrice, salePrice, unit, imageUrl, active } = body
 
-    const product = await db.product.update({
+    // Explicitly pick fields to avoid mass assignment security risks
+    const {
+      name,
+      description,
+      categoryId,
+      costPrice,
+      salePrice,
+      unit,
+      imageUrl,
+      active
+    } = body
+
+    const updateData: any = {}
+    if (name !== undefined) updateData.name = name
+    if (description !== undefined) updateData.description = description
+    if (categoryId !== undefined) updateData.categoryId = categoryId
+    if (costPrice !== undefined) updateData.costPrice = typeof costPrice === 'string' ? parseFloat(costPrice) : costPrice
+    if (salePrice !== undefined) updateData.salePrice = typeof salePrice === 'string' ? parseFloat(salePrice) : salePrice
+    if (unit !== undefined) updateData.unit = unit
+    if (imageUrl !== undefined) updateData.imageUrl = imageUrl
+    if (active !== undefined) updateData.active = active
+
+    const updatedProduct = await db.product.update({
       where: { id },
-      data: {
-        name,
-        barcode: barcode || null,
-        sku: sku || null,
-        description,
-        categoryId: categoryId || null,
-        costPrice: parseFloat(costPrice) || 0,
-        salePrice: parseFloat(salePrice) || 0,
-        unit: unit || 'pieza',
-        imageUrl,
-        active: active ?? true,
-      },
+      data: updateData,
     })
 
-    return NextResponse.json({ success: true, data: product })
+    return NextResponse.json({ success: true, data: updatedProduct })
   } catch (error) {
     console.error('Error updating product:', error)
     return NextResponse.json({ success: false, error: 'Error al actualizar producto' }, { status: 500 })
-  }
-}
-
-// DELETE - Desactivar producto
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { id } = await params
-    const product = await db.product.update({
-      where: { id },
-      data: { active: false },
-    })
-
-    return NextResponse.json({ success: true, data: product })
-  } catch (error) {
-    console.error('Error deleting product:', error)
-    return NextResponse.json({ success: false, error: 'Error al eliminar producto' }, { status: 500 })
   }
 }
