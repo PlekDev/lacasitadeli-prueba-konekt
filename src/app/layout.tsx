@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
 import "./globals.css";
-import { Toaster } from "@/components/ui/toaster";
+import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,18 +13,23 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const playfair = Playfair_Display({
+  variable: "--font-playfair",
+  subsets: ["latin"],
+});
+
 export const metadata: Metadata = {
-  title: "La Casita - Sistema de Punto de Venta",
-  description: "Sistema de punto de venta para La Casita. Gestión de inventario, ventas y corte de caja.",
-  keywords: ["La Casita", "POS", "Punto de Venta", "Inventario", "Ventas"],
-  authors: [{ name: "La Casita" }],
+  title: "La Casita Deli | Sabores Artesanales",
+  description: "Descubre la mejor selección de productos gourmet, repostería artesanal y cocina internacional en La Casita Delicatessen.",
+  keywords: ["La Casita", "Gourmet", "Deli", "Market", "Artesanal", "Comida"],
+  authors: [{ name: "La Casita Deli" }],
   icons: {
     icon: "/logo.svg",
   },
   openGraph: {
-    title: "La Casita - Sistema POS",
-    description: "Sistema de punto de venta para La Casita",
-    siteName: "La Casita",
+    title: "La Casita Deli | Sabores Artesanales",
+    description: "Productos gourmet y cocina artesanal entregados en tu hogar.",
+    siteName: "La Casita Deli",
     type: "website",
   },
 };
@@ -37,10 +42,10 @@ export default function RootLayout({
   return (
     <html lang="es" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}
+        className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} antialiased bg-background text-foreground`}
       >
         {children}
-        <Toaster />
+        <Toaster position="top-right" />
       </body>
     </html>
   );
