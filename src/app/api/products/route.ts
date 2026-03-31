@@ -5,19 +5,24 @@ import { db } from '@/lib/db'
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
+    const id = searchParams.get('id') || ''
     const search = searchParams.get('search') || ''
     const categoryId = searchParams.get('categoryId') || ''
     const barcode = searchParams.get('barcode') || ''
     const locationId = searchParams.get('locationId') || ''
     
+    const limit = parseInt(searchParams.get('limit') || '100')
+    const excludeId = searchParams.get('excludeId') || ''
+
     const products = await db.product.findMany({
       where: {
         active: true,
+        ...(id && { id }),
+        ...(excludeId && { id: { not: excludeId } }),
         ...(search && {
           OR: [
-            { name: { contains: search } },
-            { barcode: { contains: search } },
-            { sku: { contains: search } },
+            { name: { contains: search, mode: 'insensitive' } },
+            { barcode: { contains: search, mode: 'insensitive' } },
           ]
         }),
         ...(categoryId && { categoryId }),
@@ -29,8 +34,8 @@ export async function GET(request: NextRequest) {
           where: { locationId },
         } : true,
       },
-      orderBy: { name: 'asc' },
-      take: 100,
+      orderBy: { createdAt: 'desc' },
+      take: limit,
     })
 
     return NextResponse.json({ success: true, data: products })
