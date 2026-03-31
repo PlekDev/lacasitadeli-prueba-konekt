@@ -1,3 +1,5 @@
+'use client'
+
 import { Navbar } from '@/components/store/navbar'
 import { Footer } from '@/components/store/footer'
 import { ProductCard } from '@/components/store/product-card'
@@ -5,8 +7,33 @@ import { Button } from '@/components/ui/button'
 import { ArrowRight, Star, Clock, Truck, ShieldCheck } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useState, useEffect } from 'react'
 
 export default function LandingPage() {
+  const [newArrivals, setNewArrivals] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchNewArrivals = async () => {
+      try {
+        const locRes = await fetch('/api/locations')
+        const locData = await locRes.json()
+        const locationId = locData.success && locData.data.length > 0 ? locData.data[0].id : ''
+
+        const res = await fetch(`/api/products?limit=4&locationId=${locationId}`)
+        const data = await res.json()
+        if (data.success) {
+          setNewArrivals(data.data.slice(0, 4))
+        }
+      } catch (err) {
+        console.error('Error fetching arrivals:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchNewArrivals()
+  }, [])
+
   return (
     <div className="min-h-screen bg-casita-cream flex flex-col">
       <Navbar />
@@ -112,7 +139,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* New Arrivals Preview - Dynamic section will go here */}
+      {/* New Arrivals Preview */}
       <section className="py-24 px-6">
          <div className="max-w-7xl mx-auto">
             <div className="flex items-end justify-between mb-12">
@@ -126,14 +153,24 @@ export default function LandingPage() {
             </div>
 
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-               {/* Placeholder products for now - should fetch from DB */}
-               {[
-                 { id: '1', name: 'Aceite de Oliva Extra Virgen', price: 24.99, category: 'Deli', stock: 12 },
-                 { id: '2', name: 'Café de Especialidad - Chiapas', price: 18.50, category: 'Cafetería', stock: 5 },
-                 { id: '3', name: 'Queso Manchego Curado', price: 32.00, category: 'Lácteos', stock: 0 },
-                 { id: '4', name: 'Vino Tinto - Valle de Guadalupe', price: 45.00, category: 'Vinos', stock: 24 },
-               ].map((prod) => (
-                 <ProductCard key={prod.id} {...prod} />
+               {loading ? (
+                  [1,2,3,4].map(i => (
+                     <div key={i} className="flex flex-col gap-4 animate-pulse">
+                        <div className="aspect-square bg-white rounded-lg border border-black/5" />
+                        <div className="h-4 bg-white w-2/3 rounded" />
+                        <div className="h-4 bg-white w-1/3 rounded" />
+                     </div>
+                  ))
+               ) : newArrivals.map((prod) => (
+                 <ProductCard
+                   key={prod.id}
+                   id={prod.id}
+                   name={prod.name}
+                   price={prod.salePrice}
+                   imageUrl={prod.imageUrl}
+                   category={prod.category?.name}
+                   stock={prod.inventory?.[0]?.quantity || 0}
+                 />
                ))}
             </div>
          </div>
