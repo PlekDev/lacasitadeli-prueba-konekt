@@ -1,3 +1,5 @@
+'use client'
+
 import { Navbar } from '@/components/store/navbar'
 import { Footer } from '@/components/store/footer'
 import { ProductCard } from '@/components/store/product-card'
@@ -5,8 +7,31 @@ import { Button } from '@/components/ui/button'
 import { ArrowRight, Star, Clock, Truck, ShieldCheck } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useState, useEffect } from 'react'
 
 export default function LandingPage() {
+  const [featuredProducts, setFeaturedProducts] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchFeatured = async () => {
+      try {
+        const res = await fetch('/api/products?visibleWeb=true')
+        const data = await res.json()
+        if (data.success) {
+          // Just take the first 4 for the landing page
+          setFeaturedProducts(data.data.slice(0, 4))
+        }
+      } catch (err) {
+        console.error('Error fetching featured products:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchFeatured()
+  }, [])
+
   return (
     <div className="min-h-screen bg-casita-cream flex flex-col">
       <Navbar />
@@ -112,7 +137,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* New Arrivals Preview - Dynamic section will go here */}
+      {/* New Arrivals Preview */}
       <section className="py-24 px-6">
          <div className="max-w-7xl mx-auto">
             <div className="flex items-end justify-between mb-12">
@@ -125,17 +150,31 @@ export default function LandingPage() {
                </Link>
             </div>
 
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-               {/* Placeholder products for now - should fetch from DB */}
-               {[
-                 { id: '1', name: 'Aceite de Oliva Extra Virgen', price: 24.99, category: 'Deli', stock: 12 },
-                 { id: '2', name: 'Café de Especialidad - Chiapas', price: 18.50, category: 'Cafetería', stock: 5 },
-                 { id: '3', name: 'Queso Manchego Curado', price: 32.00, category: 'Lácteos', stock: 0 },
-                 { id: '4', name: 'Vino Tinto - Valle de Guadalupe', price: 45.00, category: 'Vinos', stock: 24 },
-               ].map((prod) => (
-                 <ProductCard key={prod.id} {...prod} />
-               ))}
-            </div>
+            {loading ? (
+               <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+                  {[1,2,3,4].map(i => (
+                    <div key={i} className="flex flex-col gap-4 animate-pulse">
+                      <div className="aspect-square bg-muted rounded-lg" />
+                      <div className="h-4 bg-muted w-2/3 rounded" />
+                      <div className="h-4 bg-muted w-1/3 rounded" />
+                    </div>
+                  ))}
+               </div>
+            ) : (
+               <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+                  {featuredProducts.map((prod) => (
+                    <ProductCard
+                      key={prod.id}
+                      id={prod.id}
+                      name={prod.nombre}
+                      price={prod.precio_venta}
+                      category={prod.categorias?.nombre}
+                      stock={prod.stock_actual}
+                      imageUrl={prod.imagen_url}
+                    />
+                  ))}
+               </div>
+            )}
          </div>
       </section>
 

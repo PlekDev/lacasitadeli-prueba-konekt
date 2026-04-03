@@ -6,30 +6,27 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const search = searchParams.get('search') || ''
-    const categoryId = searchParams.get('categoryId') || ''
+    const categoriaId = searchParams.get('categoryId') || ''
     const barcode = searchParams.get('barcode') || ''
-    const locationId = searchParams.get('locationId') || ''
+    const visibleWeb = searchParams.get('visibleWeb')
     
-    const products = await db.product.findMany({
+    const products = await db.productos.findMany({
       where: {
-        active: true,
+        activo: true,
+        ...(visibleWeb !== null && { visible_web: visibleWeb === 'true' }),
         ...(search && {
           OR: [
-            { name: { contains: search } },
-            { barcode: { contains: search } },
-            { sku: { contains: search } },
+            { nombre: { contains: search, mode: 'insensitive' } },
+            { codigo_barras: { contains: search } },
           ]
         }),
-        ...(categoryId && { categoryId }),
-        ...(barcode && { barcode }),
+        ...(categoriaId && { categoria_id: parseInt(categoriaId) }),
+        ...(barcode && { codigo_barras: barcode }),
       },
       include: {
-        category: true,
-        inventory: locationId ? {
-          where: { locationId },
-        } : true,
+        categorias: true,
       },
-      orderBy: { name: 'asc' },
+      orderBy: { nombre: 'asc' },
       take: 100,
     })
 
@@ -44,32 +41,33 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { name, barcode, sku, description, categoryId, costPrice, salePrice, unit, imageUrl, initialStock, locationId } = body
+    const {
+      nombre,
+      codigo_barras,
+      descripcion,
+      categoria_id,
+      precio_compra,
+      precio_venta,
+      stock_actual,
+      stock_minimo,
+      imagen_url,
+      visible_web
+    } = body
 
-    const product = await db.product.create({
+    const product = await db.productos.create({
       data: {
-        name,
-        barcode: barcode || null,
-        sku: sku || null,
-        description,
-        categoryId: categoryId || null,
-        costPrice: parseFloat(costPrice) || 0,
-        salePrice: parseFloat(salePrice) || 0,
-        unit: unit || 'pieza',
-        imageUrl,
+        nombre,
+        codigo_barras: codigo_barras || null,
+        descripcion,
+        categoria_id: categoria_id ? parseInt(categoria_id) : null,
+        precio_compra: parseFloat(precio_compra) || 0,
+        precio_venta: parseFloat(precio_venta) || 0,
+        stock_actual: parseInt(stock_actual) || 0,
+        stock_minimo: parseInt(stock_minimo) || 5,
+        imagen_url,
+        visible_web: visible_web !== undefined ? visible_web : true,
       },
     })
-
-    // Si se especifica stock inicial, crear registro de inventario
-    if (initialStock && locationId) {
-      await db.inventory.create({
-        data: {
-          productId: product.id,
-          locationId,
-          quantity: parseInt(initialStock),
-        },
-      })
-    }
 
     return NextResponse.json({ success: true, data: product })
   } catch (error) {
