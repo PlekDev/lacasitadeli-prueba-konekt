@@ -6,7 +6,7 @@ import { ShoppingBag, Heart } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface ProductCardProps {
-  id: string
+  id: string | number
   name: string
   price: number
   imageUrl?: string | null
@@ -82,7 +82,7 @@ export function ProductCard({
           <h3 className="text-sm font-serif font-bold text-casita-charcoal line-clamp-1">{name}</h3>
         </Link>
         <div className="flex items-center justify-between mt-0.5">
-          <p className="text-sm font-bold text-casita-terracotta">${price.toFixed(2)}</p>
+          <p className="text-sm font-bold text-casita-terracotta">${Number(price).toFixed(2)}</p>
           <p className={cn(
             "text-[10px] font-medium",
             isOutOfStock ? "text-muted-foreground" : isLowStock ? "text-casita-terracotta" : "text-casita-olive"

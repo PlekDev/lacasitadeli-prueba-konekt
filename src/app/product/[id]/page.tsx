@@ -9,7 +9,6 @@ import {
   Heart,
   Truck,
   ShieldCheck,
-  RefreshCcw,
   Star,
   ChevronRight,
   Minus,
@@ -31,15 +30,18 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await fetch(`/api/products/${id}?locationId=loc_market`)
+        const res = await fetch(`/api/products/${id}`)
         const data = await res.json()
         if (data.success) {
-           setProduct(data.data)
+           const prod = data.data
+           setProduct(prod)
 
            // Fetch recommendations based on category
-           const recRes = await fetch(`/api/products?categoryId=${data.data.categoryId}&limit=4&excludeId=${id}`)
-           const recData = await recRes.json()
-           if (recData.success) setRecommendations(recData.data)
+           if (prod.categoria_id) {
+             const recRes = await fetch(`/api/products?categoryId=${prod.categoria_id}&limit=4&excludeId=${id}`)
+             const recData = await recRes.json()
+             if (recData.success) setRecommendations(recData.data.filter((p: any) => p.id.toString() !== id))
+           }
         }
       } catch (err) {
         console.error('Error fetching product:', err)
@@ -65,7 +67,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
      </div>
   )
 
-  const stock = product.inventory?.[0]?.quantity || 0
+  const stock = product.stock_actual || 0
   const isOutOfStock = stock <= 0
 
   return (
@@ -79,15 +81,15 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
             <ChevronRight className="h-3 w-3" />
             <Link href="/market" className="hover:text-casita-terracotta transition-colors">Market</Link>
             <ChevronRight className="h-3 w-3" />
-            <span className="text-casita-charcoal">{product.name}</span>
+            <span className="text-casita-charcoal">{product.nombre}</span>
          </div>
 
          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 mb-32">
             {/* Gallery */}
             <div className="flex flex-col gap-6">
                <div className="relative aspect-square bg-white rounded-2xl overflow-hidden border border-black/5 shadow-sm">
-                  {product.imageUrl ? (
-                    <Image src={product.imageUrl} alt={product.name} fill className="object-cover" />
+                  {product.imagen_url ? (
+                    <Image src={product.imagen_url} alt={product.nombre} fill className="object-cover" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-muted-foreground/30 font-serif text-4xl italic">
                        La Casita
@@ -118,11 +120,11 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
             <div className="flex flex-col gap-8">
                <div className="flex flex-col gap-4">
                   <div className="flex items-center gap-2">
-                     <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-casita-terracotta">{product.category?.name || 'Gourmet'}</span>
+                     <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-casita-terracotta">{product.categorias?.nombre || 'Gourmet'}</span>
                   </div>
-                  <h1 className="text-5xl font-serif font-bold text-casita-charcoal leading-tight">{product.name}</h1>
+                  <h1 className="text-5xl font-serif font-bold text-casita-charcoal leading-tight">{product.nombre}</h1>
                   <div className="flex items-center gap-4 mt-2">
-                     <p className="text-3xl font-bold text-casita-terracotta">${product.salePrice.toFixed(2)}</p>
+                     <p className="text-3xl font-bold text-casita-terracotta">${Number(product.precio_venta).toFixed(2)}</p>
                      <div className="flex items-center gap-1">
                         {[1,2,3,4,5].map(i => <Star key={i} className="h-3 w-3 fill-casita-gold text-casita-gold" />)}
                         <span className="text-xs text-muted-foreground ml-1">(12 reseñas)</span>
@@ -131,7 +133,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                </div>
 
                <p className="text-muted-foreground leading-relaxed">
-                  {product.description || 'Nuestra selección exclusiva de productos gourmet garantiza la mayor calidad y sabor para tus preparaciones. Curado especialmente por nuestros expertos para brindarte una experiencia gastronómica única.'}
+                  {product.descripcion || 'Nuestra selección exclusiva de productos gourmet garantiza la mayor calidad y sabor para tus preparaciones. Curado especialmente por nuestros expertos para brindarte una experiencia gastronómica única.'}
                </p>
 
                <div className="flex flex-col gap-4 pt-4 border-t border-black/5">
@@ -235,7 +237,17 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
             </div>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
                {recommendations.length > 0 ? (
-                  recommendations.map(prod => <ProductCard key={prod.id} {...prod} price={prod.salePrice} category={prod.category?.name} stock={prod.inventory?.[0]?.quantity || 0} />)
+                  recommendations.map(prod => (
+                    <ProductCard
+                      key={prod.id}
+                      id={prod.id}
+                      name={prod.nombre}
+                      price={prod.precio_venta}
+                      category={prod.categorias?.nombre}
+                      stock={prod.stock_actual}
+                      imageUrl={prod.imagen_url}
+                    />
+                  ))
                ) : (
                   [1,2,3,4].map(i => <div key={i} className="aspect-[3/4] bg-white rounded-xl animate-pulse" />)
                )}

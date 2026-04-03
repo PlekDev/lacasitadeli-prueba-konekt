@@ -13,14 +13,14 @@ export default function MarketPage() {
   const [categories, setCategories] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+  const [selectedCategory, setSelectedCategory] = useState<number | null>(null)
   const [showFilters, setShowFilters] = useState(false)
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const [prodRes, catRes] = await Promise.all([
-          fetch('/api/products?locationId=loc_market'), // Using the tienda/market location by default
+          fetch('/api/products?visibleWeb=true'),
           fetch('/api/categories')
         ])
 
@@ -40,8 +40,8 @@ export default function MarketPage() {
   }, [])
 
   const filteredProducts = products.filter(p => {
-    const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase())
-    const matchesCategory = !selectedCategory || p.categoryId === selectedCategory
+    const matchesSearch = p.nombre.toLowerCase().includes(search.toLowerCase())
+    const matchesCategory = !selectedCategory || p.categoria_id === selectedCategory
     return matchesSearch && matchesCategory
   })
 
@@ -126,7 +126,7 @@ export default function MarketPage() {
                             )}
                             onClick={() => setSelectedCategory(cat.id)}
                           >
-                             {cat.name}
+                             {cat.nombre}
                           </button>
                        ))}
                     </div>
@@ -177,11 +177,11 @@ export default function MarketPage() {
                        <ProductCard
                          key={product.id}
                          id={product.id}
-                         name={product.name}
-                         price={product.salePrice}
-                         category={product.category?.name}
-                         stock={product.inventory?.[0]?.quantity || 0}
-                         imageUrl={product.imageUrl}
+                         name={product.nombre}
+                         price={product.precio_venta}
+                         category={product.categorias?.nombre}
+                         stock={product.stock_actual}
+                         imageUrl={product.imagen_url}
                        />
                     ))}
                  </div>

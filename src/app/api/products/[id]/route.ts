@@ -7,16 +7,16 @@ export async function GET(
 ) {
   try {
     const { id } = await params
-    const { searchParams } = new URL(request.url)
-    const locationId = searchParams.get('locationId') || ''
+    const idInt = parseInt(id)
 
-    const product = await db.product.findUnique({
-      where: { id },
+    if (isNaN(idInt)) {
+      return NextResponse.json({ success: false, error: 'ID de producto inválido' }, { status: 400 })
+    }
+
+    const product = await db.productos.findUnique({
+      where: { id: idInt },
       include: {
-        category: true,
-        inventory: locationId ? {
-          where: { locationId },
-        } : true,
+        categorias: true,
       },
     })
 
@@ -37,32 +37,41 @@ export async function PATCH(
 ) {
   try {
     const { id } = await params
+    const idInt = parseInt(id)
     const body = await request.json()
+
+    if (isNaN(idInt)) {
+      return NextResponse.json({ success: false, error: 'ID de producto inválido' }, { status: 400 })
+    }
 
     // Explicitly pick fields to avoid mass assignment security risks
     const {
-      name,
-      description,
-      categoryId,
-      costPrice,
-      salePrice,
-      unit,
-      imageUrl,
-      active
+      nombre,
+      descripcion,
+      categoria_id,
+      precio_compra,
+      precio_venta,
+      stock_actual,
+      stock_minimo,
+      imagen_url,
+      activo,
+      visible_web
     } = body
 
     const updateData: any = {}
-    if (name !== undefined) updateData.name = name
-    if (description !== undefined) updateData.description = description
-    if (categoryId !== undefined) updateData.categoryId = categoryId
-    if (costPrice !== undefined) updateData.costPrice = typeof costPrice === 'string' ? parseFloat(costPrice) : costPrice
-    if (salePrice !== undefined) updateData.salePrice = typeof salePrice === 'string' ? parseFloat(salePrice) : salePrice
-    if (unit !== undefined) updateData.unit = unit
-    if (imageUrl !== undefined) updateData.imageUrl = imageUrl
-    if (active !== undefined) updateData.active = active
+    if (nombre !== undefined) updateData.nombre = nombre
+    if (descripcion !== undefined) updateData.descripcion = descripcion
+    if (categoria_id !== undefined) updateData.categoria_id = typeof categoria_id === 'string' ? parseInt(categoria_id) : categoria_id
+    if (precio_compra !== undefined) updateData.precio_compra = typeof precio_compra === 'string' ? parseFloat(precio_compra) : precio_compra
+    if (precio_venta !== undefined) updateData.precio_venta = typeof precio_venta === 'string' ? parseFloat(precio_venta) : precio_venta
+    if (stock_actual !== undefined) updateData.stock_actual = typeof stock_actual === 'string' ? parseInt(stock_actual) : stock_actual
+    if (stock_minimo !== undefined) updateData.stock_minimo = typeof stock_minimo === 'string' ? parseInt(stock_minimo) : stock_minimo
+    if (imagen_url !== undefined) updateData.imagen_url = imagen_url
+    if (activo !== undefined) updateData.activo = activo
+    if (visible_web !== undefined) updateData.visible_web = visible_web
 
-    const updatedProduct = await db.product.update({
-      where: { id },
+    const updatedProduct = await db.productos.update({
+      where: { id: idInt },
       data: updateData,
     })
 

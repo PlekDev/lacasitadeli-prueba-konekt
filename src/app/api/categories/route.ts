@@ -4,14 +4,14 @@ import { db } from '@/lib/db'
 // GET - Listar categorías
 export async function GET(request: NextRequest) {
   try {
-    const categories = await db.category.findMany({
-      where: { active: true },
+    const categories = await db.categorias.findMany({
+      where: { activo: true },
       include: {
         _count: {
-          select: { products: true },
+          select: { productos: true },
         },
       },
-      orderBy: { name: 'asc' },
+      orderBy: { nombre: 'asc' },
     })
 
     return NextResponse.json({ success: true, data: categories })
@@ -25,10 +25,10 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { name, description, color, icon } = body
+    const { nombre, descripcion } = body
 
-    const category = await db.category.create({
-      data: { name, description, color, icon },
+    const category = await db.categorias.create({
+      data: { nombre, descripcion },
     })
 
     return NextResponse.json({ success: true, data: category })
