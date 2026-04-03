@@ -15,31 +15,12 @@ export default function MarketPage() {
   const [search, setSearch] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [showFilters, setShowFilters] = useState(false)
-  const [locationId, setLocationId] = useState<string | null>(null)
 
   useEffect(() => {
-    const fetchLocation = async () => {
-      try {
-        const res = await fetch('/api/locations')
-        const data = await res.json()
-        if (data.success && data.data.length > 0) {
-          const marketLoc = data.data.find((l: any) => l.name === 'Casita Market')
-          setLocationId(marketLoc ? marketLoc.id : data.data[0].id)
-        }
-      } catch (err) {
-        console.error('Error fetching locations:', err)
-      }
-    }
-    fetchLocation()
-  }, [])
-
-  useEffect(() => {
-    if (!locationId) return
-
     const fetchData = async () => {
       try {
         const [prodRes, catRes] = await Promise.all([
-          fetch(`/api/products?locationId=${locationId}`),
+          fetch('/api/products?locationId=loc_market'), // Using the tienda/market location by default
           fetch('/api/categories')
         ])
 
@@ -56,7 +37,7 @@ export default function MarketPage() {
     }
 
     fetchData()
-  }, [locationId])
+  }, [])
 
   const filteredProducts = products.filter(p => {
     const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase())
@@ -69,6 +50,7 @@ export default function MarketPage() {
       <Navbar />
 
       <main className="flex-1 pt-32 pb-24 px-6 max-w-7xl mx-auto w-full">
+        {/* Header Section */}
         <div className="flex flex-col gap-4 mb-12">
            <div className="flex items-center gap-2">
               <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-casita-terracotta">La Casita Market</span>
@@ -80,6 +62,7 @@ export default function MarketPage() {
            </p>
         </div>
 
+        {/* Toolbar */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-12 border-b border-black/5 pb-8">
            <div className="relative w-full md:w-96 group">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-casita-terracotta transition-colors" />
@@ -109,10 +92,17 @@ export default function MarketPage() {
                     <List className="h-4 w-4" />
                  </button>
               </div>
+              <div className="hidden lg:flex items-center gap-2 ml-4">
+                 <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Ordenar por:</span>
+                 <button className="text-xs font-bold uppercase tracking-widest flex items-center gap-1 hover:text-casita-terracotta transition-colors">
+                    Recomendados <ChevronDown className="h-3 w-3" />
+                 </button>
+              </div>
            </div>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-12">
+           {/* Sidebar Filters */}
            {showFilters && (
               <aside className="lg:w-64 flex flex-col gap-10">
                  <div>
@@ -141,9 +131,35 @@ export default function MarketPage() {
                        ))}
                     </div>
                  </div>
+
+                 <div>
+                    <h3 className="text-xs font-bold uppercase tracking-[0.2em] mb-6 text-casita-charcoal">Precio</h3>
+                    <div className="flex flex-col gap-6">
+                       <input type="range" className="w-full accent-casita-terracotta" />
+                       <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold">$0</span>
+                          <span className="text-xs font-bold">$500+</span>
+                       </div>
+                    </div>
+                 </div>
+
+                 <div>
+                    <h3 className="text-xs font-bold uppercase tracking-[0.2em] mb-6 text-casita-charcoal">Disponibilidad</h3>
+                    <div className="flex flex-col gap-3">
+                       <label className="flex items-center gap-3 text-sm font-medium text-muted-foreground cursor-pointer hover:text-casita-charcoal transition-colors">
+                          <input type="checkbox" className="rounded border-black/10 accent-casita-terracotta" />
+                          En stock
+                       </label>
+                       <label className="flex items-center gap-3 text-sm font-medium text-muted-foreground cursor-pointer hover:text-casita-charcoal transition-colors">
+                          <input type="checkbox" className="rounded border-black/10 accent-casita-terracotta" />
+                          Ofertas especiales
+                       </label>
+                    </div>
+                 </div>
               </aside>
            )}
 
+           {/* Product Grid */}
            <div className="flex-1">
               {loading ? (
                  <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">

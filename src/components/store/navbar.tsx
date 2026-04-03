@@ -5,17 +5,10 @@ import { useState, useEffect } from 'react'
 import { ShoppingCart, Menu, X, Search, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { useCartStore } from '@/store/cart-store'
 
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const itemCount = useCartStore((state) => state.getItemCount())
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
 
   useEffect(() => {
     const handleScroll = () => {
@@ -69,11 +62,9 @@ export function Navbar() {
           </button>
           <Link href="/cart" className="p-2 hover:bg-black/5 rounded-full transition-colors relative">
             <ShoppingCart className="h-5 w-5" />
-            {mounted && itemCount > 0 && (
-              <span className="absolute top-0 right-0 bg-casita-terracotta text-white text-[10px] font-bold h-4 w-4 rounded-full flex items-center justify-center">
-                {itemCount}
-              </span>
-            )}
+            <span className="absolute top-0 right-0 bg-casita-terracotta text-white text-[10px] font-bold h-4 w-4 rounded-full flex items-center justify-center">
+              0
+            </span>
           </Link>
           <button
             className="md:hidden p-2 hover:bg-black/5 rounded-full transition-colors"
