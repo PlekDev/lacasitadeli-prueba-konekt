@@ -5,9 +5,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { ShoppingBag, ChevronRight, Truck, Info } from 'lucide-react'
 import Image from 'next/image'
+import { useState } from 'react'
+import { CheckoutModal } from './checkout-modal'
 
-export function CheckoutSummary() {
+interface CheckoutSummaryProps {
+  notes?: string
+}
+
+export function CheckoutSummary({ notes = '' }: CheckoutSummaryProps) {
   const { items, getTotal } = useCartStore()
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   const subtotal = getTotal()
   const shipping = subtotal > 500 ? 0 : 85
@@ -62,9 +69,18 @@ export function CheckoutSummary() {
             <span className="text-2xl font-bold text-casita-terracotta">${total.toFixed(2)}</span>
          </div>
 
-         <Button className="w-full h-14 rounded-full bg-casita-charcoal hover:bg-casita-olive transition-all duration-300 font-bold uppercase tracking-[0.2em] text-[10px] gap-2 mt-4 shadow-lg group">
-            Pagar Ahora <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+         <Button
+           onClick={() => setIsModalOpen(true)}
+           className="w-full h-14 rounded-full bg-casita-charcoal hover:bg-casita-olive transition-all duration-300 font-bold uppercase tracking-[0.2em] text-[10px] gap-2 mt-4 shadow-lg group"
+         >
+            FINALIZAR PEDIDO <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
          </Button>
+
+         <CheckoutModal
+           isOpen={isModalOpen}
+           onClose={() => setIsModalOpen(false)}
+           notes={notes}
+         />
       </CardContent>
     </Card>
   )
