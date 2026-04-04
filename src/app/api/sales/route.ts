@@ -1,49 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 
-// GET - Listar ventas
+// GET - Listar ventas (Solo ventas completadas por defecto)
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
-    const locationId = searchParams.get('locationId') || ''
-    const sessionId = searchParams.get('sessionId') || ''
-    const date = searchParams.get('date') || ''
-    const cashierId = searchParams.get('cashierId') || ''
+    const folio = searchParams.get('folio') || ''
+    const canal = searchParams.get('canal') || ''
     
-    // Construir filtros de fecha
-    let dateFilter = {}
-    if (date) {
-      const startDate = new Date(date)
-      startDate.setHours(0, 0, 0, 0)
-      const endDate = new Date(date)
-      endDate.setHours(23, 59, 59, 999)
-      dateFilter = {
-        createdAt: {
-          gte: startDate,
-          lte: endDate,
-        },
-      }
-    }
-
-    const sales = await db.sale.findMany({
+    const sales = await db.ventas.findMany({
       where: {
-        status: 'completada',
-        ...(locationId && { locationId }),
-        ...(sessionId && { sessionId }),
-        ...(cashierId && { cashierId }),
-        ...dateFilter,
+        ...(folio && { folio: { contains: folio } }),
+        ...(canal && { canal }),
       },
       include: {
-        items: {
+        detalle_venta: {
           include: {
-            product: true,
+            productos: true,
           },
         },
-        cashier: true,
-        location: true,
+        usuarios: true,
       },
-      orderBy: { createdAt: 'desc' },
-      take: 100,
+      orderBy: { created_at: 'desc' },
+      take: 50,
     })
 
     return NextResponse.json({ success: true, data: sales })
@@ -53,89 +32,116 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST - Crear nueva venta
+// POST - Crear nueva venta (Checkout en línea)
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { locationId, cashierId, sessionId, items, paymentMethod, cashReceived, discount, notes } = body
+    const { items, paymentMethod, notes } = body
 
-    // Obtener el último número de factura
-    const lastSale = await db.sale.findFirst({
-      orderBy: { invoiceNumber: 'desc' },
-    })
-    
-    let invoiceNumber = 'F0001'
-    if (lastSale) {
-      const lastNum = parseInt(lastSale.invoiceNumber.replace('F', ''))
-      invoiceNumber = `F${String(lastNum + 1).padStart(4, '0')}`
+    if (!items || items.length === 0) {
+      return NextResponse.json({ success: false, error: 'No hay productos en la venta' }, { status: 400 })
     }
 
-    // Calcular totales
-    let subtotal = 0
-    const saleItems = []
-    
-    for (const item of items) {
-      const product = await db.product.findUnique({
-        where: { id: item.productId },
+    // Usar una transacción para asegurar la integridad de los datos
+    const sale = await db.$transaction(async (tx) => {
+      // 1. Generar Folio para venta Web
+      const lastSale = await tx.ventas.findFirst({
+        where: { folio: { startsWith: 'W' } },
+        orderBy: { folio: 'desc' },
       })
       
-      if (!product) continue
-      
-      const itemSubtotal = product.salePrice * item.quantity
-      subtotal += itemSubtotal
-      
-      saleItems.push({
-        productId: item.productId,
-        quantity: item.quantity,
-        unitPrice: product.salePrice,
-        costPrice: product.costPrice,
-        discount: 0,
-        subtotal: itemSubtotal,
-      })
+      let nextFolio = 'W0001'
+      if (lastSale) {
+        const lastNum = parseInt(lastSale.folio.substring(1))
+        nextFolio = `W${String(lastNum + 1).padStart(4, '0')}`
+      }
 
-      // Descontar del inventario
-      const inventory = await db.inventory.findFirst({
-        where: { productId: item.productId, locationId },
-      })
-      
-      if (inventory) {
-        await db.inventory.update({
-          where: { id: inventory.id },
-          data: { quantity: { decrement: item.quantity } },
+      // 2. Validar stock y calcular totales (usando precios de la BD)
+      let subtotal = 0
+      const saleDetails = []
+      const stockUpdates = []
+      const movements = []
+
+      for (const item of items) {
+        const product = await tx.productos.findUnique({
+          where: { id: parseInt(item.id) },
+        })
+
+        if (!product) {
+          throw new Error(`Producto con ID ${item.id} no encontrado`)
+        }
+
+        if (product.stock_actual < item.quantity) {
+          throw new Error(`Stock insuficiente para el producto: ${product.nombre}`)
+        }
+
+        const price = Number(product.precio_venta)
+        const itemSubtotal = price * item.quantity
+        subtotal += itemSubtotal
+
+        saleDetails.push({
+          producto_id: product.id,
+          nombre_producto: product.nombre,
+          cantidad: item.quantity,
+          precio_unitario: price,
+          subtotal: itemSubtotal,
+        })
+
+        // Preparar actualizaciones de stock y movimientos
+        stockUpdates.push(
+          tx.productos.update({
+            where: { id: product.id },
+            data: { stock_actual: { decrement: item.quantity } }
+          })
+        )
+
+        movements.push({
+          producto_id: product.id,
+          tipo: 'venta',
+          cantidad: -item.quantity,
+          stock_antes: product.stock_actual,
+          stock_despues: product.stock_actual - item.quantity,
+          motivo: `Venta Web ${nextFolio}`,
         })
       }
-    }
 
-    const discountAmount = parseFloat(discount) || 0
-    const total = subtotal - discountAmount
-    const change = cashReceived ? parseFloat(cashReceived) - total : null
+      const total = subtotal // Por ahora no manejamos descuentos en web
 
-    // Crear la venta
-    const sale = await db.sale.create({
-      data: {
-        invoiceNumber,
-        locationId,
-        cashierId,
-        sessionId: sessionId || null,
-        subtotal,
-        discount: discountAmount,
-        total,
-        paymentMethod,
-        cashReceived: cashReceived ? parseFloat(cashReceived) : null,
-        change,
-        notes,
-        items: { create: saleItems },
-      },
-      include: {
-        items: {
-          include: { product: true },
+      // 3. Crear la Venta
+      const newSale = await tx.ventas.create({
+        data: {
+          folio: nextFolio,
+          canal: 'web',
+          subtotal,
+          total,
+          metodo_pago: paymentMethod || 'tarjeta',
+          estado: 'completada',
+          notas: notes || '',
+          detalle_venta: {
+            create: saleDetails
+          }
         },
-      },
+        include: {
+          detalle_venta: true
+        }
+      })
+
+      // 4. Ejecutar actualizaciones de stock y crear movimientos
+      await Promise.all(stockUpdates)
+
+      await tx.movimientos_inventario.createMany({
+        data: movements.map(m => ({
+          ...m,
+          referencia_id: newSale.id
+        }))
+      })
+
+      return newSale
     })
 
     return NextResponse.json({ success: true, data: sale })
-  } catch (error) {
-    console.error('Error creating sale:', error)
-    return NextResponse.json({ success: false, error: 'Error al crear venta' }, { status: 500 })
+  } catch (error: any) {
+    console.error('Error creating web sale:', error)
+    return NextResponse.json({ success: false, error: error.message || 'Error al procesar la venta' }, { status: 500 })
   }
 }

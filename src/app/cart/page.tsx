@@ -10,15 +10,19 @@ import {
   Plus,
   Minus,
   ArrowLeft,
-  ShoppingBasket
+  ShoppingBasket,
+  X
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Image from 'next/image'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
+import { useState } from 'react'
+import { Textarea } from '@/components/ui/textarea'
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, clearCart } = useCartStore()
+  const [notes, setNotes] = useState('')
 
   return (
     <div className="min-h-screen bg-casita-cream flex flex-col">
@@ -51,90 +55,90 @@ export default function CartPage() {
                </Link>
             </div>
          ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-16 items-start">
-               {/* Cart Table Area */}
-               <div className="lg:col-span-2 flex flex-col gap-8">
-                  <div className="flex items-center justify-between pb-6 border-b border-black/5">
-                     <span className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">Productos ({items.length})</span>
-                     <button
-                       onClick={clearCart}
-                       className="text-xs font-bold uppercase tracking-[0.2em] text-casita-terracotta hover:underline underline-offset-4"
-                     >
-                        Vaciar Carrito
-                     </button>
+            <div className="flex flex-col gap-12">
+               <div className="w-full overflow-hidden">
+                  <div className="grid grid-cols-6 gap-4 pb-6 border-b border-black/5 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+                     <div className="col-span-3">Producto</div>
+                     <div className="text-right">Precio</div>
+                     <div className="text-center">Cantidad</div>
+                     <div className="text-right">Total</div>
                   </div>
 
                   <div className="flex flex-col divide-y divide-black/5">
                      {items.map((item) => (
-                        <div key={item.id} className="py-10 flex flex-col sm:flex-row items-center sm:items-start gap-10">
-                           {/* Product Image */}
-                           <div className="relative h-40 w-40 bg-white rounded-2xl overflow-hidden border border-black/5 shadow-md shrink-0">
-                              {item.imageUrl ? (
-                                <Image src={item.imageUrl} alt={item.name} fill className="object-cover" />
-                              ) : (
-                                <div className="w-full h-full flex items-center justify-center text-muted-foreground/30 font-serif italic text-2xl">
-                                   La Casita
-                                </div>
-                              )}
+                        <div key={item.id} className="py-8 grid grid-cols-6 gap-4 items-center">
+                           {/* Product Info */}
+                           <div className="col-span-3 flex items-center gap-6">
+                              <div className="relative h-20 w-20 bg-white rounded-lg overflow-hidden border border-black/5 shrink-0">
+                                 {item.imageUrl ? (
+                                   <Image src={item.imageUrl} alt={item.name} fill className="object-cover" />
+                                 ) : (
+                                   <div className="w-full h-full flex items-center justify-center text-muted-foreground/30 font-serif italic text-xs">
+                                      La Casita
+                                   </div>
+                                 )}
+                              </div>
+                              <h3 className="text-sm font-bold text-casita-charcoal line-clamp-2">{item.name}</h3>
                            </div>
 
-                           {/* Info & Quantity */}
-                           <div className="flex-1 flex flex-col sm:flex-row justify-between w-full gap-8">
-                              <div className="flex flex-col gap-4">
-                                 <h3 className="text-2xl font-serif font-bold text-casita-charcoal">{item.name}</h3>
-                                 <div className="flex items-center gap-6">
-                                    <div className="flex flex-col">
-                                       <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Precio Unitario</span>
-                                       <span className="font-bold text-casita-charcoal">${item.price.toFixed(2)}</span>
-                                    </div>
-                                    <div className="h-8 w-px bg-black/5" />
-                                    <div className="flex flex-col">
-                                       <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Subtotal</span>
-                                       <span className="font-bold text-casita-terracotta">${(item.price * item.quantity).toFixed(2)}</span>
-                                    </div>
-                                 </div>
-                              </div>
+                           {/* Price */}
+                           <div className="text-right text-sm font-medium text-casita-charcoal">
+                              ${Number(item.price).toFixed(2)}
+                           </div>
 
-                              <div className="flex flex-col sm:items-end justify-between gap-4">
-                                 <div className="flex items-center bg-white border border-black/10 rounded-full p-1 h-12 w-32 shadow-sm">
-                                    <button
-                                      className="flex-1 flex justify-center hover:text-casita-terracotta disabled:opacity-30"
-                                      onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                                      disabled={item.quantity <= 1}
-                                    >
-                                       <Minus className="h-4 w-4" />
-                                    </button>
-                                    <span className="flex-1 text-center font-bold">{item.quantity}</span>
-                                    <button
-                                      className="flex-1 flex justify-center hover:text-casita-terracotta disabled:opacity-30"
-                                      onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                                      disabled={item.stock !== undefined && item.quantity >= item.stock}
-                                    >
-                                       <Plus className="h-4 w-4" />
-                                    </button>
-                                 </div>
+                           {/* Quantity */}
+                           <div className="flex flex-col items-center gap-2">
+                              <div className="flex items-center bg-white border border-black/10 rounded-md h-10 w-24">
                                  <button
-                                   onClick={() => removeItem(item.id)}
-                                   className="text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-casita-terracotta flex items-center gap-2 transition-colors"
+                                   className="flex-1 flex justify-center hover:text-casita-terracotta disabled:opacity-30"
+                                   onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                   disabled={item.quantity <= 1}
                                  >
-                                    <Trash2 className="h-4 w-4" /> Eliminar
+                                    <Minus className="h-3 w-3" />
+                                 </button>
+                                 <span className="flex-1 text-center text-sm font-bold">{item.quantity}</span>
+                                 <button
+                                   className="flex-1 flex justify-center hover:text-casita-terracotta disabled:opacity-30"
+                                   onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                   disabled={item.stock !== undefined && item.quantity >= item.stock}
+                                 >
+                                    <Plus className="h-3 w-3" />
                                  </button>
                               </div>
+                              <button
+                                onClick={() => removeItem(item.id)}
+                                className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-casita-terracotta flex items-center gap-1 transition-colors"
+                              >
+                                 Quitar <X className="h-3 w-3" />
+                              </button>
+                           </div>
+
+                           {/* Total */}
+                           <div className="text-right text-sm font-bold text-casita-charcoal">
+                              ${(Number(item.price) * item.quantity).toFixed(2)}
                            </div>
                         </div>
                      ))}
                   </div>
-
-                  <div className="pt-8 border-t border-black/5">
-                     <p className="text-xs text-muted-foreground italic leading-relaxed">
-                        * Los tiempos de entrega pueden variar dependiendo de la disponibilidad de productos frescos.
-                        Al realizar tu compra, aceptas nuestros términos y condiciones de envío.
-                     </p>
-                  </div>
                </div>
 
-               {/* Summary Column */}
-               <CheckoutSummary />
+               <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 pt-12 border-t border-black/5">
+                  <div className="flex flex-col gap-4">
+                     <label className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">
+                        Instrucciones de Recolección / Comentarios
+                     </label>
+                     <Textarea
+                       placeholder="Agrega aquí cualquier instrucción especial..."
+                       className="min-h-[120px] bg-white border-black/10 focus:border-casita-terracotta focus:ring-casita-terracotta/10 rounded-xl p-4"
+                       value={notes}
+                       onChange={(e) => setNotes(e.target.value)}
+                     />
+                  </div>
+
+                  <div className="flex justify-end">
+                     <CheckoutSummary notes={notes} />
+                  </div>
+               </div>
             </div>
          )}
       </main>
