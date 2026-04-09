@@ -24,7 +24,7 @@ export function ProductCard({ id, name, price, category, stock, imageUrl }: Prod
     e.preventDefault()
     e.stopPropagation()
     addItem({
-      id,
+      id: id.toString(),
       name,
       price,
       quantity: 1,
