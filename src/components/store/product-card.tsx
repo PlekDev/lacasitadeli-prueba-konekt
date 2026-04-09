@@ -2,117 +2,87 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { ShoppingBag, Heart } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { Plus } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { useCartStore } from '@/store/cart-store'
 import { toast } from 'sonner'
+import { cn } from '@/lib/utils'
 
 interface ProductCardProps {
-  id: string | number
+  id: number
   name: string
   price: number
-  imageUrl?: string | null
   category?: string
-  stock?: number
-  className?: string
+  stock: number
+  imageUrl?: string | null
 }
 
-export function ProductCard({
-  id,
-  name,
-  price,
-  imageUrl,
-  category,
-  stock = 0,
-  className
-}: ProductCardProps) {
-  const isOutOfStock = stock <= 0
-  const isLowStock = stock > 0 && stock <= 5
+export function ProductCard({ id, name, price, category, stock, imageUrl }: ProductCardProps) {
   const addItem = useCartStore((state) => state.addItem)
 
-  const handleAddToCart = () => {
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
     addItem({
-      id: String(id),
+      id,
       name,
       price,
-      imageUrl,
-      stock,
-      quantity: 1
+      quantity: 1,
+      imageUrl: imageUrl || undefined
     })
-    toast.success(`${name} añadido al carrito`, {
-      description: "Puedes verlo en tu bolsa de compras.",
-      action: {
-        label: "Ver Carrito",
-        onClick: () => window.location.href = "/cart"
-      }
-    })
+    toast.success(`${name} añadido al carrito`)
   }
 
   return (
-    <div className={cn("group flex flex-col gap-3 relative", className)}>
-      {/* Image Container */}
-      <div className="relative aspect-square overflow-hidden bg-muted rounded-lg border border-black/5 group-hover:shadow-md transition-all duration-300">
+    <Link
+      href={`/product/${id}`}
+      className="group flex flex-col bg-surface-container-lowest rounded-xl overflow-hidden editorial-shadow transition-transform duration-500 hover:-translate-y-1"
+    >
+      <div className="relative aspect-square overflow-hidden bg-surface-container">
         {imageUrl ? (
           <Image
             src={imageUrl}
             alt={name}
             fill
-            className="object-cover group-hover:scale-105 transition-transform duration-500"
+            className="object-cover transition-transform duration-700 group-hover:scale-105"
+            sizes="(max-width: 768px) 50vw, 25vw"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-muted-foreground/30 font-serif text-lg italic">
-            La Casita
+          <div className="w-full h-full flex items-center justify-center text-on-surface-variant/20">
+            <span className="font-headline italic text-4xl">La Casita</span>
           </div>
         )}
 
-        {/* Badges */}
-        <div className="absolute top-2 left-2 flex flex-col gap-1.5 pointer-events-none">
-          {isOutOfStock && (
-             <span className="bg-casita-charcoal text-white text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full shadow-sm">
-                Agotado
-             </span>
-          )}
-          {isLowStock && (
-             <span className="bg-casita-terracotta text-white text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full shadow-sm">
-                Quedan pocos
-             </span>
-          )}
-        </div>
+        <button
+          onClick={handleAddToCart}
+          className="absolute bottom-4 right-4 bg-primary text-on-primary p-3 rounded-full shadow-lg opacity-0 translate-y-4 transition-all duration-300 group-hover:opacity-100 group-hover:translate-y-0 active:scale-95"
+          disabled={stock <= 0}
+        >
+          <Plus className="w-5 h-5" />
+        </button>
 
-        {/* Action Overlay */}
-        <div className="absolute inset-x-0 bottom-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300 bg-gradient-to-t from-black/20 to-transparent flex gap-2">
-          <button
-            disabled={isOutOfStock}
-            onClick={handleAddToCart}
-            className="flex-1 bg-white text-casita-charcoal py-2 rounded-md font-medium text-xs uppercase tracking-wider hover:bg-casita-charcoal hover:text-white transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <ShoppingBag className="h-3 w-3" />
-            Añadir
-          </button>
-          <button className="bg-white p-2 rounded-md hover:text-casita-terracotta transition-colors">
-            <Heart className="h-4 w-4" />
-          </button>
-        </div>
+        {stock <= 0 && (
+          <div className="absolute inset-0 bg-surface/60 backdrop-blur-[2px] flex items-center justify-center">
+            <span className="font-label text-[10px] uppercase tracking-widest bg-error text-on-error px-3 py-1 rounded-full">Agotado</span>
+          </div>
+        )}
       </div>
 
-      {/* Info */}
-      <div className="flex flex-col gap-1 px-1">
-        <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold">
-          {category || 'Deli Market'}
-        </p>
-        <Link href={`/product/${id}`} className="hover:text-casita-terracotta transition-colors">
-          <h3 className="text-sm font-serif font-bold text-casita-charcoal line-clamp-1">{name}</h3>
-        </Link>
-        <div className="flex items-center justify-between mt-0.5">
-          <p className="text-sm font-bold text-casita-terracotta">${Number(price).toFixed(2)}</p>
-          <p className={cn(
-            "text-[10px] font-medium",
-            isOutOfStock ? "text-muted-foreground" : isLowStock ? "text-casita-terracotta" : "text-casita-olive"
-          )}>
-            {isOutOfStock ? 'Sin stock' : `${stock} disponibles`}
-          </p>
+      <div className="p-6 flex flex-col gap-2">
+        <div className="flex justify-between items-start gap-4">
+          <div className="flex flex-col">
+            <span className="font-label text-[10px] uppercase tracking-widest text-secondary mb-1">
+              {category || 'Artesanal'}
+            </span>
+            <h3 className="font-headline italic text-xl text-primary leading-tight line-clamp-1">
+              {name}
+            </h3>
+          </div>
+          <span className="font-body font-bold text-primary">
+            ${price.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+          </span>
         </div>
       </div>
-    </div>
+    </Link>
   )
 }

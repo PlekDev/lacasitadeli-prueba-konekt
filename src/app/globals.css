@@ -4,86 +4,72 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-serif: var(--font-playfair);
+  --font-headline: var(--font-headline);
+  --font-body: var(--font-body);
+  --font-label: var(--font-label);
 
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
+  --color-background: #fcf9f4;
+  --color-surface: #fcf9f4;
+  --color-on-surface: #1c1c19;
+  --color-on-surface-variant: #414844;
 
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --color-primary: #012d1d;
+  --color-on-primary: #ffffff;
+  --color-primary-container: #1b4332;
+  --color-on-primary-container: #86af99;
 
-  /* Custom palette based on mockup */
-  --color-casita-cream: #FDFBF7;
-  --color-casita-charcoal: #1C1C1C;
-  --color-casita-olive: #4A5D4E;
-  --color-casita-terracotta: #A65D46;
-  --color-casita-gold: #C5A059;
+  --color-secondary: #7b5819;
+  --color-on-secondary: #ffffff;
+  --color-secondary-container: #fdcd83;
+  --color-on-secondary-container: #785516;
+
+  --color-tertiary: #1b291f;
+  --color-on-tertiary: #ffffff;
+
+  --color-error: #ba1a1a;
+  --color-on-error: #ffffff;
+
+  --color-outline: #717973;
+  --color-outline-variant: #c1c8c2;
+
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f6f3ee;
+  --color-surface-container: #f0ede8;
+  --color-surface-container-high: #ebe8e3;
+  --color-surface-container-highest: #e5e2dd;
+
+  --color-primary-fixed: #c1ecd4;
+  --color-on-primary-fixed: #002114;
+  --color-primary-fixed-dim: #a5d0b9;
+
+  --color-secondary-fixed: #ffdeae;
+  --color-on-secondary-fixed: #281900;
+  --color-secondary-fixed-dim: #eebf76;
 }
 
 :root {
-  --radius: 0.5rem;
-
-  /* Primary Store Colors */
-  --background: #FDFBF7; /* Off-white cream */
-  --foreground: #1C1C1C; /* Elegant Charcoal */
-
-  --card: #FFFFFF;
-  --card-foreground: #1C1C1C;
-
-  --popover: #FFFFFF;
-  --popover-foreground: #1C1C1C;
-
-  --primary: #4A5D4E; /* Olive Green */
-  --primary-foreground: #FDFBF7;
-
-  --secondary: #A65D46; /* Terracotta */
-  --secondary-foreground: #FDFBF7;
-
-  --muted: #F3F0E9;
-  --muted-foreground: #666666;
-
-  --accent: #C5A059; /* Gold/Brass accent */
-  --accent-foreground: #1C1C1C;
-
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: #E5E1D8;
-  --input: #E5E1D8;
-  --ring: #4A5D4E;
-}
-
-.dark {
-  --background: #1C1C1C;
-  --foreground: #FDFBF7;
-  --card: #262626;
-  --card-foreground: #FDFBF7;
-  --primary: #6A7D6E;
-  --primary-foreground: #FDFBF7;
-  --border: #333333;
+  --background: #fcf9f4;
+  --foreground: #1c1c19;
+  --radius: 0.25rem;
 }
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-outline-variant/20;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-on-surface font-body selection:bg-primary-fixed-dim selection:text-primary;
   }
   h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-playfair), serif;
+    @apply font-headline tracking-tight;
+  }
+}
+
+@layer utilities {
+  .editorial-shadow {
+    box-shadow: 0px 12px 32px rgba(28, 28, 25, 0.06);
+  }
+  .glass-nav {
+    @apply bg-surface/80 backdrop-blur-xl;
   }
 }
