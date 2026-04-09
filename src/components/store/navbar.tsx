@@ -2,11 +2,13 @@
 
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
+import { usePathname } from 'next/navigation'
 import { ShoppingBasket, User, Menu, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useCartStore } from '@/store/cart-store'
 
 export function Navbar() {
+  const pathname = usePathname()
   const [isScrolled, setIsScrolled] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const cartCount = useCartStore((state) => state.items.reduce((acc, item) => acc + item.quantity, 0))
@@ -20,7 +22,7 @@ export function Navbar() {
   }, [])
 
   const navLinks = [
-    { name: 'Market', href: '/market', active: true },
+    { name: 'Market', href: '/market' },
     { name: 'Deli', href: '/deli' },
     { name: 'Menu', href: '/menu' },
     { name: 'Brands', href: '/brands' },
@@ -38,18 +40,21 @@ export function Navbar() {
             La Casita Deli
           </Link>
           <div className="hidden md:flex items-center gap-8 font-label text-[10px] uppercase tracking-[0.2em]">
-            {navLinks.map((link) => (
-              <Link
-                key={link.name}
-                href={link.href}
-                className={cn(
-                  "transition-colors hover:text-primary",
-                  link.active ? "text-primary border-b-2 border-primary pb-1 font-semibold" : "text-on-surface-variant/60"
-                )}
-              >
-                {link.name}
-              </Link>
-            ))}
+            {navLinks.map((link) => {
+              const isActive = pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href))
+              return (
+                <Link
+                  key={link.name}
+                  href={link.href}
+                  className={cn(
+                    "transition-colors hover:text-primary",
+                    isActive ? "text-primary border-b-2 border-primary pb-1 font-semibold" : "text-on-surface-variant/60"
+                  )}
+                >
+                  {link.name}
+                </Link>
+              )
+            })}
           </div>
         </div>
 
@@ -77,19 +82,22 @@ export function Navbar() {
       {/* Mobile Menu */}
       {mobileMenuOpen && (
         <div className="md:hidden bg-surface border-b border-outline-variant/10 px-8 py-6 flex flex-col gap-4 font-label text-[10px] uppercase tracking-[0.2em]">
-          {navLinks.map((link) => (
-            <Link
-              key={link.name}
-              href={link.href}
-              className={cn(
-                "py-2",
-                link.active ? "text-primary font-bold" : "text-on-surface-variant/60"
-              )}
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              {link.name}
-            </Link>
-          ))}
+          {navLinks.map((link) => {
+            const isActive = pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href))
+            return (
+              <Link
+                key={link.name}
+                href={link.href}
+                className={cn(
+                  "py-2",
+                  isActive ? "text-primary font-bold" : "text-on-surface-variant/60"
+                )}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                {link.name}
+              </Link>
+            )
+          })}
         </div>
       )}
     </header>

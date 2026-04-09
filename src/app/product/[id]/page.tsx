@@ -18,6 +18,8 @@ import { Button } from '@/components/ui/button'
 import Image from 'next/image'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
+import { useCartStore } from '@/store/cart-store'
+import { toast } from 'sonner'
 
 export default function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
@@ -26,6 +28,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   const [loading, setLoading] = useState(true)
   const [quantity, setQuantity] = useState(1)
   const [selectedImage, setSelectedImage] = useState(0)
+  const addItem = useCartStore((state) => state.addItem)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -69,6 +72,21 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
   const stock = product.stock_actual || 0
   const isOutOfStock = stock <= 0
+
+  const handleAddToCart = () => {
+    if (!product) return
+    addItem({
+      id: product.id.toString(),
+      name: product.nombre,
+      price: Number(product.precio_venta),
+      quantity: quantity,
+      imageUrl: product.imagen_url,
+      stock: product.stock_actual
+    })
+    toast.success(`${product.nombre} añadido al carrito`, {
+      description: `${quantity} unidades añadidas correctamente.`,
+    })
+  }
 
   return (
     <div className="min-h-screen bg-casita-cream flex flex-col">
@@ -166,6 +184,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                      </div>
                      <Button
                        disabled={isOutOfStock}
+                       onClick={handleAddToCart}
                        className="flex-1 h-14 bg-casita-charcoal hover:bg-casita-olive transition-all duration-300 rounded-full font-bold uppercase tracking-widest"
                      >
                         Añadir al Carrito

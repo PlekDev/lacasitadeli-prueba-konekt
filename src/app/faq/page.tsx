@@ -13,49 +13,36 @@ import { Button } from '@/components/ui/button'
 
 const faqs = [
   {
-    category: 'Pedidos y Envíos',
+    category: 'Pagos',
     questions: [
       {
-        q: '¿A qué zonas realizan envíos?',
-        a: 'Realizamos envíos a toda la Ciudad de México y Área Metropolitana. Para envíos nacionales, por favor contáctanos directamente para cotizar la mejor opción de transporte refrigerado si es necesario.'
+        q: '¿Cómo puedo pagar mi pedido?',
+        a: 'Aceptamos todas las tarjetas de crédito y débito (Visa, Mastercard, American Express), así como pagos a través de nuestra plataforma segura. También puedes optar por transferencia bancaria si lo prefieres.'
       },
       {
-        q: '¿Cuánto tiempo tarda en llegar mi pedido?',
-        a: 'Los pedidos realizados antes de las 12:00 PM se entregan el mismo día. Los pedidos posteriores se programan para la mañana del día siguiente.'
+        q: 'Si selecciono la opción de pickup, ¿Puedo pagar en persona?',
+        a: 'Por el momento, todos los pedidos deben ser liquidados a través de la plataforma para garantizar la reserva de tus productos. Estamos trabajando para habilitar pagos en terminal física muy pronto.'
+      },
+      {
+        q: '¿Por qué mi pedido no ha sido confirmado completamente?',
+        a: 'A veces, algunos productos artesanales tienen disponibilidad limitada. Si un artículo de tu pedido no está disponible, te contactaremos de inmediato para ofrecerte un reemplazo o realizar el reembolso correspondiente.'
+      }
+    ]
+  },
+  {
+    category: 'Envíos y Reembolsos',
+    questions: [
+      {
+        q: '¿Cuánto tiempo tardará en llegar mi orden?',
+        a: 'Los pedidos locales suelen entregarse en un plazo de 24 a 48 horas hábiles. Recibirás una notificación por correo electrónico en cuanto tu pedido vaya en camino.'
       },
       {
         q: '¿Cuál es el costo de envío?',
-        a: 'El envío es gratuito en compras mayores a $500 MXN. Para montos menores, el costo estándar es de $85 MXN dentro de nuestra zona de cobertura principal.'
-      }
-    ]
-  },
-  {
-    category: 'Productos y Calidad',
-    questions: [
-      {
-        q: '¿Sus productos son frescos?',
-        a: 'Absolutamente. Recibimos suministros diariamente y nuestra repostería se hornea cada mañana. Todos los productos deli se mantienen bajo estrictos controles de temperatura.'
+        a: 'El costo de envío se calcula al finalizar tu compra basado en tu ubicación. Ofrecemos envío gratuito en pedidos superiores a un monto mínimo especificado en el carrito.'
       },
       {
-        q: '¿Ofrecen opciones para dietas especiales?',
-        a: 'Sí, contamos con una selección de productos gluten-free, keto-friendly y opciones veganas tanto en nuestro market como en nuestra repostería.'
-      },
-      {
-        q: '¿Cómo garantizan la calidad de los productos importados?',
-        a: 'Trabajamos directamente con importadores certificados y mantenemos la cadena de frío desde el origen hasta tu mesa.'
-      }
-    ]
-  },
-  {
-    category: 'Pagos y Facturación',
-    questions: [
-      {
-        q: '¿Qué métodos de pago aceptan?',
-        a: 'Aceptamos todas las tarjetas de crédito y débito (Visa, Mastercard, American Express), transferencias bancarias y pagos a través de PayPal.'
-      },
-      {
-        q: '¿Puedo solicitar factura de mi compra?',
-        a: 'Sí, puedes solicitar tu factura al momento de finalizar tu compra o enviando un correo a facturacion@lacasitadeli.com con tu número de pedido.'
+        q: 'Cambié de opinión, prefiero retirar mi pedido en persona. ¿Es posible? ¿Se reembolsa el costo de envío?',
+        a: 'Sí, es posible cambiar a modalidad pickup si tu pedido aún no ha sido despachado. En ese caso, te generaremos un cupón de crédito por el valor del envío para tu próxima compra.'
       }
     ]
   }
@@ -72,17 +59,17 @@ export default function FAQPage() {
            <div className="flex items-center gap-2">
               <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-casita-terracotta">Centro de Ayuda</span>
            </div>
-           <h1 className="text-5xl md:text-6xl font-serif font-bold text-casita-charcoal">¿Preguntas Frecuentes?</h1>
-           <p className="text-muted-foreground text-sm max-w-lg">
-              Todo lo que necesitas saber sobre La Casita Deli. Si no encuentras la respuesta que buscas, nuestro equipo está listo para ayudarte.
+           <h1 className="text-5xl md:text-6xl font-serif font-bold text-casita-charcoal">Frequently Asked Questions</h1>
+           <p className="text-muted-foreground text-sm max-w-lg mt-2">
+              Todo lo que necesitas saber sobre tus pedidos en La Casita Deli.
            </p>
 
-           <div className="relative w-full max-w-md group mt-4">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-casita-terracotta transition-colors" />
+           <div className="relative w-full max-w-2xl group mt-8">
+              <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-casita-terracotta transition-colors" />
               <input
                 type="text"
-                placeholder="Busca un tema o pregunta..."
-                className="w-full pl-12 pr-6 py-4 bg-white border border-black/5 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-casita-terracotta/20 focus:border-casita-terracotta transition-all shadow-sm"
+                placeholder="Buscar preguntas frecuentes"
+                className="w-full pl-14 pr-8 py-5 bg-white border border-black/5 rounded-none text-base focus:outline-none focus:ring-1 focus:ring-casita-terracotta transition-all shadow-sm"
               />
            </div>
         </div>
@@ -91,16 +78,16 @@ export default function FAQPage() {
         <div className="flex flex-col gap-16">
            {faqs.map((section) => (
               <div key={section.category} className="flex flex-col gap-6">
-                 <h2 className="text-xs font-bold uppercase tracking-[0.3em] text-casita-terracotta border-b border-casita-terracotta/20 pb-4">
+                 <h2 className="text-2xl font-serif font-bold text-casita-olive mb-4">
                     {section.category}
                  </h2>
                  <Accordion type="single" collapsible className="w-full">
                     {section.questions.map((faq, index) => (
-                       <AccordionItem key={index} value={`item-${index}`} className="border-black/5">
-                          <AccordionTrigger className="text-left font-serif font-bold text-lg hover:text-casita-terracotta transition-colors py-6">
+                       <AccordionItem key={index} value={`${section.category}-${index}`} className="border-b border-black/10">
+                          <AccordionTrigger className="text-left font-serif font-medium text-xl hover:text-casita-terracotta transition-colors py-8">
                              {faq.q}
                           </AccordionTrigger>
-                          <AccordionContent className="text-muted-foreground leading-relaxed pb-6">
+                          <AccordionContent className="text-muted-foreground text-lg leading-relaxed pb-8">
                              {faq.a}
                           </AccordionContent>
                        </AccordionItem>
@@ -111,19 +98,15 @@ export default function FAQPage() {
         </div>
 
         {/* Contact Section */}
-        <div className="mt-32 p-12 bg-white rounded-3xl border border-black/5 shadow-xl flex flex-col items-center text-center gap-8 relative overflow-hidden">
-           {/* Decorative elements */}
-           <div className="absolute -top-12 -right-12 w-48 h-48 bg-casita-olive/5 rounded-full" />
-           <div className="absolute -bottom-12 -left-12 w-48 h-48 bg-casita-terracotta/5 rounded-full" />
-
-           <div className="w-16 h-16 bg-casita-olive/10 rounded-2xl flex items-center justify-center text-casita-olive">
+        <div className="mt-32 p-12 bg-white rounded-none border border-black/5 shadow-sm flex flex-col items-center text-center gap-8 relative overflow-hidden">
+           <div className="w-16 h-16 bg-casita-olive/10 rounded-full flex items-center justify-center text-casita-olive">
               <MessageSquare className="h-8 w-8" />
            </div>
 
            <div className="flex flex-col gap-2">
               <h3 className="text-3xl font-serif font-bold text-casita-charcoal">¿Aún tienes dudas?</h3>
               <p className="text-muted-foreground text-sm max-w-sm">
-                 Nuestro equipo de atención al cliente está disponible de Lunes a Sábado de 9:00 AM a 7:00 PM.
+                 Nuestro equipo de atención al cliente está listo para ayudarte.
               </p>
            </div>
 
