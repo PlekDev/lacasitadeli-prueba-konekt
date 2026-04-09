@@ -2,13 +2,14 @@
 
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
-import { ShoppingCart, Menu, X, Search, User } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { ShoppingBasket, User, Menu, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useCartStore } from '@/store/cart-store'
 
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const cartCount = useCartStore((state) => state.items.reduce((acc, item) => acc + item.quantity, 0))
 
   useEffect(() => {
     const handleScroll = () => {
@@ -19,86 +20,78 @@ export function Navbar() {
   }, [])
 
   const navLinks = [
-    { name: 'Market', href: '/market' },
+    { name: 'Market', href: '/market', active: true },
     { name: 'Deli', href: '/deli' },
-    { name: 'Menú', href: '/menu' },
+    { name: 'Menu', href: '/menu' },
     { name: 'Brands', href: '/brands' },
     { name: 'FAQ', href: '/faq' },
   ]
 
   return (
-    <nav
-      className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-300 px-6 py-4",
-        isScrolled ? "bg-white/90 backdrop-blur-md shadow-sm py-3" : "bg-transparent"
-      )}
-    >
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
-        {/* Left Links - Desktop */}
-        <div className="hidden md:flex items-center gap-8">
-          {navLinks.map((link) => (
-            <Link
-              key={link.name}
-              href={link.href}
-              className="text-sm font-medium tracking-wide uppercase hover:text-casita-terracotta transition-colors"
-            >
-              {link.name}
-            </Link>
-          ))}
-        </div>
-
-        {/* Logo */}
-        <Link href="/" className="absolute left-1/2 -translate-x-1/2 md:static md:translate-x-0">
-          <h1 className="text-2xl font-serif font-bold tracking-tight">La Casita Deli</h1>
-        </Link>
-
-        {/* Right Actions */}
-        <div className="flex items-center gap-4">
-          <button className="p-2 hover:bg-black/5 rounded-full transition-colors">
-            <Search className="h-5 w-5" />
-          </button>
-          <button className="p-2 hover:bg-black/5 rounded-full transition-colors hidden sm:block">
-            <User className="h-5 w-5" />
-          </button>
-          <Link href="/cart" className="p-2 hover:bg-black/5 rounded-full transition-colors relative">
-            <ShoppingCart className="h-5 w-5" />
-            <span className="absolute top-0 right-0 bg-casita-terracotta text-white text-[10px] font-bold h-4 w-4 rounded-full flex items-center justify-center">
-              0
-            </span>
+    <header className={cn(
+      "w-full top-0 sticky z-50 transition-all duration-300 border-b border-outline-variant/10",
+      isScrolled ? "glass-nav py-3" : "bg-transparent py-4"
+    )}>
+      <nav className="flex justify-between items-center px-8 max-w-7xl mx-auto">
+        <div className="flex items-center gap-12">
+          <Link href="/" className="text-2xl font-headline font-bold text-primary tracking-tight">
+            La Casita Deli
           </Link>
+          <div className="hidden md:flex items-center gap-8 font-label text-[10px] uppercase tracking-[0.2em]">
+            {navLinks.map((link) => (
+              <Link
+                key={link.name}
+                href={link.href}
+                className={cn(
+                  "transition-colors hover:text-primary",
+                  link.active ? "text-primary border-b-2 border-primary pb-1 font-semibold" : "text-on-surface-variant/60"
+                )}
+              >
+                {link.name}
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-6">
+          <Link href="/cart" className="p-2 hover:bg-stone-100/50 rounded-full transition-all active:scale-95 duration-150 relative text-primary">
+            <ShoppingBasket className="w-5 h-5" />
+            {cartCount > 0 && (
+              <span className="absolute top-0 right-0 bg-secondary text-on-secondary text-[8px] font-bold h-4 w-4 rounded-full flex items-center justify-center">
+                {cartCount}
+              </span>
+            )}
+          </Link>
+          <button className="p-2 hover:bg-stone-100/50 rounded-full transition-all active:scale-95 duration-150 text-primary">
+            <User className="w-5 h-5" />
+          </button>
           <button
-            className="md:hidden p-2 hover:bg-black/5 rounded-full transition-colors"
-            onClick={() => setMobileMenuOpen(true)}
+            className="md:hidden p-2 text-primary"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
-            <Menu className="h-5 w-5" />
+            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
-      </div>
+      </nav>
 
       {/* Mobile Menu */}
-      <div className={cn(
-        "fixed inset-0 bg-white z-[60] flex flex-col transition-transform duration-300 md:hidden",
-        mobileMenuOpen ? "translate-x-0" : "translate-x-full"
-      )}>
-        <div className="flex justify-between items-center p-6 border-b">
-          <h2 className="text-xl font-serif font-bold">La Casita Deli</h2>
-          <button onClick={() => setMobileMenuOpen(false)}>
-            <X className="h-6 w-6" />
-          </button>
-        </div>
-        <div className="flex flex-col gap-6 p-8">
+      {mobileMenuOpen && (
+        <div className="md:hidden bg-surface border-b border-outline-variant/10 px-8 py-6 flex flex-col gap-4 font-label text-[10px] uppercase tracking-[0.2em]">
           {navLinks.map((link) => (
             <Link
               key={link.name}
               href={link.href}
-              className="text-2xl font-serif hover:text-casita-terracotta"
+              className={cn(
+                "py-2",
+                link.active ? "text-primary font-bold" : "text-on-surface-variant/60"
+              )}
               onClick={() => setMobileMenuOpen(false)}
             >
               {link.name}
             </Link>
           ))}
         </div>
-      </div>
-    </nav>
+      )}
+    </header>
   )
 }

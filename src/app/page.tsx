@@ -4,7 +4,7 @@ import { Navbar } from '@/components/store/navbar'
 import { Footer } from '@/components/store/footer'
 import { ProductCard } from '@/components/store/product-card'
 import { Button } from '@/components/ui/button'
-import { ArrowRight, Star, Clock, Truck, ShieldCheck } from 'lucide-react'
+import { ArrowRight, CheckCircle, Star } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
@@ -19,7 +19,6 @@ export default function LandingPage() {
         const res = await fetch('/api/products?visibleWeb=true')
         const data = await res.json()
         if (data.success) {
-          // Just take the first 4 for the landing page
           setFeaturedProducts(data.data.slice(0, 4))
         }
       } catch (err) {
@@ -28,155 +27,219 @@ export default function LandingPage() {
         setLoading(false)
       }
     }
-
     fetchFeatured()
   }, [])
 
   return (
-    <div className="min-h-screen bg-casita-cream flex flex-col">
+    <div className="min-h-screen bg-surface flex flex-col selection:bg-primary-fixed-dim selection:text-primary">
       <Navbar />
 
-      {/* Hero Section */}
-      <section className="relative h-[90vh] flex items-center justify-center pt-20 px-6 overflow-hidden">
-        {/* Decorative background circle */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-casita-olive/5 rounded-full -z-10 blur-3xl animate-pulse" />
-
-        <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <div className="flex flex-col gap-6 text-center lg:text-left">
-            <div className="flex items-center gap-2 justify-center lg:justify-start">
-              <span className="w-12 h-[1px] bg-casita-terracotta" />
-              <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-casita-terracotta">Est. 1994</span>
+      <main>
+        {/* Hero Section */}
+        <section className="relative overflow-hidden pt-12 pb-24 md:pt-24 md:pb-32 px-8">
+          <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            <div className="lg:col-span-6 z-10">
+              <span className="font-label text-[10px] uppercase tracking-[0.3em] text-secondary mb-6 block">Est. 1984 — Artisanal Quality</span>
+              <h1 className="font-headline italic text-5xl md:text-7xl lg:text-8xl text-primary leading-[0.9] tracking-tight mb-8">
+                Sabores Artesanales, <br/> en tu hogar.
+              </h1>
+              <p className="font-body text-on-surface-variant text-lg max-w-md mb-10 leading-relaxed">
+                Discover the essence of fine dining with our curated selection of gourmet cheeses, cured meats, and artisanal breads delivered directly to your pantry.
+              </p>
+              <div className="flex flex-wrap gap-4">
+                <Link href="/market">
+                  <Button className="px-10 py-7 bg-primary text-on-primary rounded-lg font-label text-xs uppercase tracking-widest hover:brightness-110 transition-all editorial-shadow h-auto">
+                    Explorar Market
+                  </Button>
+                </Link>
+                <Link href="/about">
+                  <Button variant="outline" className="px-10 py-7 bg-transparent text-primary rounded-lg font-label text-xs uppercase tracking-widest border border-outline-variant/30 hover:bg-surface-container-low transition-all h-auto">
+                    Nuestra Historia
+                  </Button>
+                </Link>
+              </div>
             </div>
-            <h1 className="text-5xl md:text-7xl font-serif font-bold leading-tight text-casita-charcoal">
-              Sabores Artesanales,<br />
-              <span className="italic text-casita-olive">en tu hogar.</span>
-            </h1>
-            <p className="text-muted-foreground text-sm md:text-base leading-relaxed max-w-lg mx-auto lg:mx-0">
-              Curamos la mejor selección de productos nacionales e internacionales
-              para tu cocina. Calidad, frescura y sabor en cada rincón de nuestra tienda.
-            </p>
-            <div className="flex flex-col sm:flex-row items-center gap-4 mt-4 justify-center lg:justify-start">
-              <Link href="/market" className="w-full sm:w-auto">
-                <Button className="w-full sm:w-auto h-14 px-10 bg-casita-charcoal hover:bg-casita-olive transition-all duration-300 text-sm font-bold uppercase tracking-widest rounded-none">
-                  Comprar Ahora
-                </Button>
+            <div className="lg:col-span-6 relative">
+              <div className="relative aspect-[4/5] rounded-xl overflow-hidden editorial-shadow group">
+                <Image
+                  alt="Artisanal food board"
+                  fill
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQtc1rI07tQiomRPEPzjcWkaSJ2OVh-IvtgkMqgITiTT2d9JhdJg4rRhG8ID7a4y-U6pRqCBiWzugprqfqXVp7QArwqz6yAOuGrODYt3amyiNBDFRUByOniqPmlMUYTKQhluEmMysDTH3NYIlAmyj-u1lH_KbAg3uWhfhTjt_Yf5Ak-P4AuLeog7iO7iNuTxKjmWYic5n6Ec6ceUO09j2jEe89ktXK2zKEMBCIybFox6GB9G6rnQKgKSnKdcrKi4BmgTX7fmQdZsGW"
+                />
+                <div className="absolute inset-0 bg-primary/5"></div>
+              </div>
+              {/* Decorative Floating Card */}
+              <div className="absolute -bottom-10 -left-10 hidden md:block bg-surface-container-lowest p-6 rounded-xl editorial-shadow max-w-[240px]">
+                <div className="flex items-center gap-3 mb-4">
+                  <Star className="w-4 h-4 text-secondary fill-secondary" />
+                  <span className="font-label text-[10px] uppercase tracking-wider text-on-surface-variant">Best of 2024</span>
+                </div>
+                <p className="font-headline italic text-xl text-primary mb-2">Trufa Negra Selection</p>
+                <p className="font-body text-xs text-on-surface-variant">Hand-picked by our Master Sommelier.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Category Bento Grid */}
+        <section className="bg-surface-container-low py-24 px-8">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8">
+              <div className="max-w-2xl">
+                <h2 className="font-headline text-4xl md:text-5xl text-primary italic mb-6">Categorías Destacadas</h2>
+                <div className="h-px w-24 bg-secondary-fixed-dim"></div>
+              </div>
+              <p className="font-body text-on-surface-variant max-w-sm">From the rolling hills of Europe to local craft kitchens, explore our world-class pantry.</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 h-auto md:h-[600px]">
+              {/* Large Card */}
+              <Link href="/market?categoria=quesos" className="md:col-span-7 relative group overflow-hidden rounded-xl bg-surface-container-lowest">
+                <Image
+                  alt="Dairy products"
+                  fill
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuC2JGmdzslc-r7YcjgCgnbqrHtND0DzBcB4V_MqecvXi6J1nQrJbTJKmtMSnfizD6f0TJv31PJRTx78EYbL1hCpjR_NI1RtSRGEs2HZNwufSHVc_PHfxdoxAcREzd97-I5EaulmHzWBW4vfzRzZvNlzri3_jkIMcRLvZA3jVpAC-fHc8H1OAbKPd8KRWqi0iUBOd5rmYEte7EhFE_jwsXIQb_JWgded2_aScQCKuFWRo-VinlCci-J4QQ5hs4ScyZyNmWI2nudZljfw"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent"></div>
+                <div className="absolute bottom-0 left-0 p-8">
+                  <span className="bg-secondary-fixed text-on-secondary-fixed px-4 py-1 rounded-full font-label text-[10px] uppercase tracking-widest mb-4 inline-block">Quesería & Lácteos</span>
+                  <h3 className="font-headline italic text-3xl text-on-primary">Traditional Manchegos</h3>
+                  <div className="inline-flex items-center gap-2 text-on-primary/80 group-hover:text-on-primary font-label text-[10px] uppercase tracking-[0.2em] mt-4 transition-all">
+                    Ver Colección <ArrowRight className="w-3 h-3" />
+                  </div>
+                </div>
               </Link>
-              <Link href="/menu" className="w-full sm:w-auto text-sm font-bold uppercase tracking-widest hover:text-casita-terracotta transition-colors flex items-center gap-2">
-                Ver Menú del Día <ArrowRight className="h-4 w-4" />
+              {/* Top Right */}
+              <Link href="/market?categoria=embutidos" className="md:col-span-5 relative group overflow-hidden rounded-xl bg-surface-container-lowest">
+                <Image
+                  alt="Charcuterie"
+                  fill
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuCp2BIWiCeGiTFpptkutV6yYVe_jXdlaWER2RBkwiocLFGFNw3F3Jvm0NWbl0TzbwhQoJV5BEtH8LB-SNoC5VPXE9rA8oVFXNWCf3xX3CYi3BmrxWUCS5K_31vQTGUInCsaXIpIWaY15IhJWpiV56Zwjc5b14TZfJn_VyXnAYUEjV7Acjo9yq9qgNZiL5sjU8FcXLprPEWQtehsyV_yIVTpk9OgkIcF8j5eXLB92TuVcZaVOIYsH5jpLP0ldrkcktVM15G9ENFAW9Wf"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent"></div>
+                <div className="absolute bottom-0 left-0 p-8">
+                  <h3 className="font-headline italic text-2xl text-on-primary">Embutidos Ibéricos</h3>
+                  <div className="inline-flex items-center gap-2 text-on-primary/80 group-hover:text-on-primary font-label text-[10px] uppercase tracking-[0.2em] mt-2 transition-all">
+                    Shop Charcuterie
+                  </div>
+                </div>
+              </Link>
+              {/* Bottom Right Small */}
+              <Link href="/market?categoria=panaderia" className="md:col-span-5 relative group overflow-hidden rounded-xl bg-surface-container-lowest">
+                <Image
+                  alt="Bakery"
+                  fill
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuBxbYrPEs4o0-k3MfpaVvEcc8UhpqnXlBH5k2Hm59OfiYOhZ4WkR9C_Bfl2pdM-sUSgthDnoORZdSaXm7BSinp2Di5NA4KBV0DreOTn4vQXOcGkv4YPYJNMFNFWDUq0ez8VtqeCB8DNieCQ5FqTRQa9aJ55XFmT9AkYbhAnPrEmozux9FSGBYW9MscW-XexdCQXoDwJsTGJyNtqQiNaak--5JvXUSSAj0OAa64dCS1WS5A_wkE1SsCKSLKBE24sTvxvqs69jXGAHa__"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent"></div>
+                <div className="absolute bottom-0 left-0 p-8">
+                  <h3 className="font-headline italic text-2xl text-on-primary">Panadería Diaria</h3>
+                  <div className="inline-flex items-center gap-2 text-on-primary/80 group-hover:text-on-primary font-label text-[10px] uppercase tracking-[0.2em] mt-2 transition-all">
+                    Daily Bake
+                  </div>
+                </div>
               </Link>
             </div>
           </div>
-          
-          <div className="relative h-[400px] lg:h-[600px] rounded-2xl overflow-hidden shadow-2xl border border-white/20">
-             <Image
-               src="https://images.unsplash.com/photo-1626078299034-9615c348d68d?q=80&w=2000"
-               alt="Gourmet Food Selection"
-               fill
-               className="object-cover"
-             />
-             {/* Float badge */}
-             <div className="absolute bottom-8 left-8 bg-white/90 backdrop-blur-md p-6 border border-black/5 shadow-lg flex items-center gap-4 max-w-xs animate-bounce-slow">
-                <div className="w-12 h-12 bg-casita-terracotta/10 rounded-full flex items-center justify-center text-casita-terracotta">
-                   <Star className="h-6 w-6" />
-                </div>
-                <div>
-                   <p className="text-xs font-bold uppercase tracking-widest text-casita-terracotta">Selección Premium</p>
-                   <p className="text-sm font-serif font-bold text-casita-charcoal">Más de 500 productos exclusivos</p>
-                </div>
-             </div>
-          </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Featured Collections */}
-      <section className="py-24 px-6 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16 flex flex-col gap-4">
-             <h2 className="text-4xl font-serif font-bold text-casita-charcoal">Las Colecciones</h2>
-             <p className="text-muted-foreground text-sm uppercase tracking-[0.2em] font-medium italic">Descubre nuestros departamentos</p>
-             <div className="w-20 h-1 bg-casita-terracotta mx-auto mt-2" />
+        {/* Product Highlight (Editorial Feature) */}
+        <section className="py-24 px-8 max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+            <div className="order-2 lg:order-1 relative">
+              <div className="bg-surface-container-high rounded-full w-64 h-64 absolute -top-10 -right-10 -z-10"></div>
+              <div className="aspect-square bg-surface-container rounded-xl overflow-hidden editorial-shadow p-8 flex items-center justify-center relative">
+                <Image
+                  alt="Featured Product"
+                  fill
+                  className="w-full h-full object-contain mix-blend-multiply p-12"
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuDv88QPySw2yctc2yoRPwwztU6euplBk2nuY7M2xpiQoED_9rLZT0qhuTB1RKyGNK1oQuH7odXdVxQaJn6UAqktWrtw2f956ivlu2fKOMu8pNiLCgY2NNNQLuelaiUxlMhJDA-IIXUqXkKikYxx9xo1pFS0-SBoN0DuPKC6eSZpNNO__d3rBq3wv-qizFyzA3ytf8IcwTBsEbLWrTzYOKiiKcFbiAelfqdExduwcUcV8HTByvNne1V2neuY7N2NO9F95aEK5-CZRGYf"
+                />
+              </div>
+            </div>
+            <div className="order-1 lg:order-2">
+              <span className="font-label text-[10px] uppercase tracking-widest text-secondary mb-4 block">Product of the Month</span>
+              <h2 className="font-headline text-5xl text-primary italic mb-8 leading-tight">Miel de Bosque <br/> Edición Limitada</h2>
+              <p className="font-body text-on-surface-variant text-lg mb-8 leading-relaxed">
+                Harvested once a year from the wild meadows of the Pyrenees. This dark, robust honey carries notes of oak and ancient moss, perfectly pairing with our cured cheeses.
+              </p>
+              <ul className="space-y-4 mb-10">
+                <li className="flex items-center gap-4">
+                  <CheckCircle className="w-5 h-5 text-primary" />
+                  <span className="font-label text-xs uppercase tracking-wide text-on-surface">100% Organic & Raw</span>
+                </li>
+                <li className="flex items-center gap-4">
+                  <CheckCircle className="w-5 h-5 text-primary" />
+                  <span className="font-label text-xs uppercase tracking-wide text-on-surface">Sustainable Harvested</span>
+                </li>
+              </ul>
+              <Button className="px-10 py-7 bg-primary text-on-primary rounded-lg font-label text-xs uppercase tracking-widest hover:brightness-110 transition-all editorial-shadow flex items-center gap-4 h-auto">
+                Añadir al Carrito — $24.00
+              </Button>
+            </div>
           </div>
+        </section>
 
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-            {[
-              { name: 'Deli', img: 'https://images.unsplash.com/photo-1544434919-47024509ae27?q=80&w=500', href: '/deli' },
-              { name: 'Repostería', img: 'https://images.unsplash.com/photo-1488477181946-6428a0291777?q=80&w=500', href: '/bakery' },
-              { name: 'Market', img: 'https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=500', href: '/market' },
-              { name: 'Vinos', img: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?q=80&w=500', href: '/wine' },
-            ].map((col) => (
-              <Link key={col.name} href={col.href} className="group relative aspect-[3/4] overflow-hidden rounded-xl border border-black/5 shadow-sm transition-all duration-500 hover:shadow-xl hover:-translate-y-2">
-                <Image src={col.img} alt={col.name} fill className="object-cover transition-transform duration-700 group-hover:scale-110" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                <div className="absolute inset-0 flex flex-col justify-end p-8 text-white">
-                   <h3 className="text-2xl font-serif font-bold mb-2">{col.name}</h3>
-                   <span className="text-xs font-bold uppercase tracking-[0.2em] opacity-0 group-hover:opacity-100 transition-opacity duration-300">Explorar <ArrowRight className="inline h-3 w-3" /></span>
-                </div>
+        {/* Featured Products from API */}
+        <section className="py-24 px-8 bg-surface-container-low/30">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex items-end justify-between mb-16">
+              <div>
+                <span className="font-label text-[10px] uppercase tracking-widest text-secondary mb-2 block">Our Selection</span>
+                <h2 className="font-headline text-4xl text-primary italic">Featured Products</h2>
+              </div>
+              <Link href="/market" className="font-label text-[10px] uppercase tracking-[0.2em] text-on-surface-variant hover:text-primary transition-colors flex items-center gap-2">
+                View All <ArrowRight className="w-3 h-3" />
               </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Trust Badges */}
-      <section className="py-16 border-y border-black/5 bg-casita-cream/50 px-6">
-        <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
-           {[
-             { icon: Clock, title: 'Frescura Diaria', desc: 'Productos frescos cada mañana' },
-             { icon: Truck, title: 'Envíos Rápidos', desc: 'Entregas el mismo día' },
-             { icon: ShieldCheck, title: 'Calidad Premium', desc: 'Selección rigurosa' },
-             { icon: Star, title: 'Atención 5 Estrellas', desc: 'Servicio personalizado' },
-           ].map((badge) => (
-             <div key={badge.title} className="flex flex-col items-center text-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-casita-olive/10 flex items-center justify-center text-casita-olive">
-                   <badge.icon className="h-5 w-5" />
-                </div>
-                <h4 className="text-sm font-bold text-casita-charcoal uppercase tracking-wider">{badge.title}</h4>
-                <p className="text-xs text-muted-foreground">{badge.desc}</p>
-             </div>
-           ))}
-        </div>
-      </section>
-
-      {/* New Arrivals Preview */}
-      <section className="py-24 px-6">
-         <div className="max-w-7xl mx-auto">
-            <div className="flex items-end justify-between mb-12">
-               <div className="flex flex-col gap-2">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-casita-terracotta">Lo más nuevo</p>
-                  <h2 className="text-4xl font-serif font-bold text-casita-charcoal">Novedades Recientes</h2>
-               </div>
-               <Link href="/market" className="text-sm font-bold uppercase tracking-widest hover:text-casita-terracotta transition-colors flex items-center gap-2 border-b-2 border-transparent hover:border-casita-terracotta pb-1">
-                  Ver todo el catálogo <ArrowRight className="h-4 w-4" />
-               </Link>
             </div>
 
             {loading ? (
-               <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-                  {[1,2,3,4].map(i => (
-                    <div key={i} className="flex flex-col gap-4 animate-pulse">
-                      <div className="aspect-square bg-muted rounded-lg" />
-                      <div className="h-4 bg-muted w-2/3 rounded" />
-                      <div className="h-4 bg-muted w-1/3 rounded" />
-                    </div>
-                  ))}
-               </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="aspect-[3/4] bg-surface-container animate-pulse rounded-xl" />
+                ))}
+              </div>
             ) : (
-               <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-                  {featuredProducts.map((prod) => (
-                    <ProductCard
-                      key={prod.id}
-                      id={prod.id}
-                      name={prod.nombre}
-                      price={prod.precio_venta}
-                      category={prod.categorias?.nombre}
-                      stock={prod.stock_actual}
-                      imageUrl={prod.imagen_url}
-                    />
-                  ))}
-               </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                {featuredProducts.map((product) => (
+                  <ProductCard
+                    key={product.id}
+                    id={product.id}
+                    name={product.nombre}
+                    price={product.precio_venta}
+                    category={product.categorias?.nombre}
+                    stock={product.stock_actual}
+                    imageUrl={product.imagen_url}
+                  />
+                ))}
+              </div>
             )}
-         </div>
-      </section>
+          </div>
+        </section>
+
+        {/* Newsletter Section */}
+        <section className="bg-primary py-24 px-8 text-center text-on-primary">
+          <div className="max-w-2xl mx-auto">
+            <h2 className="font-headline italic text-4xl md:text-5xl mb-6">Únete a la Familia</h2>
+            <p className="font-body text-on-primary-container mb-12 opacity-90 leading-relaxed">
+              Subscribe for exclusive early access to our seasonal batches and stories from our partner farms.
+            </p>
+            <form className="flex flex-col sm:flex-row gap-4">
+              <input
+                className="flex-1 bg-primary-container/50 border border-on-primary-container/20 rounded-lg px-6 py-4 font-body text-on-primary placeholder:text-on-primary-container focus:outline-none focus:ring-2 focus:ring-primary-fixed-dim transition-all"
+                placeholder="Tu correo electrónico"
+                type="email"
+              />
+              <Button className="bg-primary-fixed text-on-primary-fixed px-8 py-7 rounded-lg font-label text-xs uppercase tracking-widest font-bold hover:bg-primary-fixed-dim transition-all h-auto">
+                Suscribirse
+              </Button>
+            </form>
+          </div>
+        </section>
+      </main>
 
       <Footer />
     </div>
